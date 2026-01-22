@@ -4,12 +4,24 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-@Getter
+
 public class ErrorResponse {
 	
 	private String message;
 	private int status;
 	private LocalDateTime timestamp;
+	
+	public String getMessage() {
+		return message;
+	}
+	
+	public int getStatus() {
+		return status;
+	}
+	
+	public LocalDateTime getTimestamp() {
+		return timestamp;
+	}
 	
 	public ErrorResponse(String message, int status) {
 		this.message = message;

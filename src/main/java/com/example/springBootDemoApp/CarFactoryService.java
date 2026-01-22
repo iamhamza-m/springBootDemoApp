@@ -1,7 +1,8 @@
 package com.example.springBootDemoApp;
 
+import com.example.springBootDemoApp.dto.CarFactoryRequestDTO;
+import com.example.springBootDemoApp.dto.CarFactoryResponseDTO;
 import com.example.springBootDemoApp.exception.CarNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -9,9 +10,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class CarFactoryService {
 	private final CarFactoryRepository repository;
+	
+	public CarFactoryService(CarFactoryRepository repository) {
+		this.repository = repository;
+	}
 	
 	private static final Logger log = LoggerFactory.getLogger(CarFactoryService.class);
 	
