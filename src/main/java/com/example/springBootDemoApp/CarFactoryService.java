@@ -20,14 +20,12 @@ public class CarFactoryService {
 	private static final Logger log = LoggerFactory.getLogger(CarFactoryService.class);
 	
 	public List<CarFactory> getAllCars(){
-		List<CarFactory> data = repository.findAll();
-		return data;
+		return repository.findAll();
 	}
 	
 	public CarFactory getCarByID(Long id){
-		CarFactory data = repository.findById(id)
+		return repository.findById(id)
 								  .orElseThrow(() -> new CarNotFoundException("No car details found with this id : " + id));
-		return data;
 	}
 	
 	public CarFactoryResponseDTO saveCarFactory(CarFactoryRequestDTO request){
