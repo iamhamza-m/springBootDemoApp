@@ -2,15 +2,15 @@ package com.example.springBootDemoApp;
 
 import com.example.springBootDemoApp.dto.CarFactoryRequestDTO;
 import com.example.springBootDemoApp.dto.CarFactoryResponseDTO;
+import com.example.springBootDemoApp.event.CarSavedEvent;
 import com.example.springBootDemoApp.exception.CarNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -18,9 +18,11 @@ import java.util.List;
 @Service
 public class CarFactoryService {
 	private final CarFactoryRepository repository;
+	private final ApplicationEventPublisher eventPublisher;
 	
-	public CarFactoryService(CarFactoryRepository repository) {
+	public CarFactoryService(CarFactoryRepository repository, ApplicationEventPublisher eventPublisher) {
 		this.repository = repository;
+		this.eventPublisher = eventPublisher;
 	}
 	
 	private static final Logger log = LoggerFactory.getLogger(CarFactoryService.class);
@@ -39,9 +41,7 @@ public class CarFactoryService {
 	}
 	
 	
-	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
-	@CachePut(value = "cars", key = "#result.carModel")
-	@CacheEvict(value = "allCars", allEntries = true)
+	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public CarFactoryResponseDTO saveCarFactory(CarFactoryRequestDTO request){
 		CarFactory entity = new CarFactory();
 		entity.setCarMakeYear(request.getCarMakeYear());
@@ -49,6 +49,8 @@ public class CarFactoryService {
 		entity.setCarCompany(request.getCarCompany());
 		
 		CarFactory saved = repository.save(entity);
+		
+		eventPublisher.publishEvent(new CarSavedEvent(saved));
 		
 		return new CarFactoryResponseDTO(
 				saved.getCarModel(),
@@ -58,8 +60,8 @@ public class CarFactoryService {
 		);
 	}
 	
-	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.READ_COMMITTED)
-	@CacheEvict(value = {"cars", "allCars"}, allEntries = true)
+	@Transactional(isolation = Isolation.READ_COMMITTED)
+	@CacheEvict(value = {"allCars"}, allEntries = true)
 	public List<CarFactory> saveCarInBulk(List<CarFactory> data){
 		log.debug("Saving {} cars", data.size());
 		return repository.saveAll(data);
