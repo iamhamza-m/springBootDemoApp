@@ -66,19 +66,10 @@ public class FileDocumentController {
 			consumes = MediaType.MULTIPART_FORM_DATA_VALUE
 	)
 	public ResponseEntity<Long> upload(
-			@RequestParam FileDocument.FileHandlingMode mode,
 			@RequestPart("file") MultipartFile file
 	) throws Exception {
 		
-		FileDocument saved;
-		
-		switch (mode) {
-			case BINARY_DB -> saved = fileDocumentService.storeAsBinary(file);
-			case BASE64_DB -> saved = fileDocumentService.storeAsBase64(file);
-			case FS_STREAM -> saved = fileDocumentService.storeFileSystem(file);
-			default -> throw new IllegalArgumentException("Unsupported mode");
-		}
-		
+		FileDocument saved = fileDocumentService.storeFileSystem(file);
 		return ResponseEntity.status(HttpStatus.CREATED).body(saved.getId());
 	}
 	
