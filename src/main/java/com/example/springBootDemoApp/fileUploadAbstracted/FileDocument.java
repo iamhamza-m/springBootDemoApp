@@ -29,6 +29,17 @@ public class FileDocument {
 	@Enumerated(EnumType.STRING)
 	private StorageType storageType;
 	
+	private String filePath;
+	
+	@Enumerated(EnumType.STRING)
+	private FileHandlingMode handlingMode;
+	
+	public enum FileHandlingMode {
+		BINARY_DB,
+		BASE64_DB,
+		FS_STREAM
+	}
+	
 	public enum StorageType {
 		BINARY,
 		BASE64
