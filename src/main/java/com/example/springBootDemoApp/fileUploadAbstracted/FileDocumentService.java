@@ -1,15 +1,15 @@
 package com.example.springBootDemoApp.fileUploadAbstracted;
 
+import com.example.springBootDemoApp.fileUploadAbstracted.kafka.FileEventProducer;
+import com.example.springBootDemoApp.fileUploadAbstracted.kafka.FileUploadedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.Base64;
 import java.util.UUID;
 
@@ -17,11 +17,28 @@ import java.util.UUID;
 public class FileDocumentService {
 	
 	private final FileDocumentRepository fileDocumentRepository;
+	private final FileEventProducer fileEventProducer;
+	
 	private static final Path ROOT = Paths.get("uploads");
 	
-	public FileDocumentService(FileDocumentRepository fileDocumentRepository) throws IOException {
+	public FileDocumentService(
+			FileDocumentRepository fileDocumentRepository,
+			FileEventProducer fileEventProducer
+	) throws IOException {
 		this.fileDocumentRepository = fileDocumentRepository;
+		this.fileEventProducer = fileEventProducer;
 		Files.createDirectories(ROOT);
+	}
+	
+	private void publishEvent(FileDocument doc) {
+		FileUploadedEvent event = new FileUploadedEvent(
+				doc.getId(),
+				doc.getFileName(),
+				doc.getContentType(),
+				doc.getHandlingMode().name()
+		);
+		
+		fileEventProducer.publish(event);
 	}
 	
 	// ---------- STORE BINARY ----------
@@ -34,8 +51,12 @@ public class FileDocumentService {
 		doc.setSize(file.getSize());
 		doc.setBinaryData(file.getBytes());
 		doc.setStorageType(FileDocument.StorageType.BINARY);
+		doc.setHandlingMode(FileDocument.FileHandlingMode.BINARY_DB);
 		
-		return fileDocumentRepository.save(doc);
+		FileDocument saved = fileDocumentRepository.save(doc);
+		
+		publishEvent(saved);
+		return saved;
 	}
 	
 	// ---------- STORE BASE64 ----------
@@ -46,14 +67,14 @@ public class FileDocumentService {
 		doc.setFileName(file.getOriginalFilename());
 		doc.setContentType(file.getContentType());
 		doc.setSize(file.getSize());
-		
-		String base64 = Base64.getEncoder().encodeToString(file.getBytes());
-		doc.setBase64Data(base64);
-		
-		doc.setBinaryData(null); // important
+		doc.setBase64Data(Base64.getEncoder().encodeToString(file.getBytes()));
 		doc.setStorageType(FileDocument.StorageType.BASE64);
+		doc.setHandlingMode(FileDocument.FileHandlingMode.BASE64_DB);
 		
-		return fileDocumentRepository.save(doc);
+		FileDocument saved = fileDocumentRepository.save(doc);
+		
+		publishEvent(saved);
+		return saved;
 	}
 	
 	// ---------- STORE FILE SYSTEM ----------
@@ -72,9 +93,11 @@ public class FileDocumentService {
 		doc.setFilePath(target.toString());
 		doc.setHandlingMode(FileDocument.FileHandlingMode.FS_STREAM);
 		
-		return fileDocumentRepository.save(doc);
+		FileDocument saved = fileDocumentRepository.save(doc);
+		
+		publishEvent(saved);
+		return saved;
 	}
-	
 	
 	// ---------- DOWNLOAD ----------
 	public FileDownloadResponse downloadFile(Long id) {
@@ -82,13 +105,9 @@ public class FileDocumentService {
 		FileDocument doc = fileDocumentRepository.findById(id)
 								   .orElseThrow(() -> new RuntimeException("File not found with id: " + id));
 		
-		byte[] data;
-		
-		if (doc.getStorageType() == FileDocument.StorageType.BINARY) {
-			data = doc.getBinaryData();
-		} else {
-			data = Base64.getDecoder().decode(doc.getBase64Data());
-		}
+		byte[] data = doc.getStorageType() == FileDocument.StorageType.BINARY
+							  ? doc.getBinaryData()
+							  : Base64.getDecoder().decode(doc.getBase64Data());
 		
 		return new FileDownloadResponse(
 				doc.getFileName(),
@@ -109,13 +128,10 @@ public class FileDocumentService {
 				outputStream.write(doc.getBinaryData());
 				
 			} else if (doc.getHandlingMode() == FileDocument.FileHandlingMode.BASE64_DB) {
-				byte[] decoded = Base64.getDecoder()
-										 .decode(doc.getBase64Data());
-				outputStream.write(decoded);
+				outputStream.write(Base64.getDecoder().decode(doc.getBase64Data()));
 				
 			} else if (doc.getHandlingMode() == FileDocument.FileHandlingMode.FS_STREAM) {
-				Path path = Paths.get(doc.getFilePath());
-				Files.copy(path, outputStream);
+				Files.copy(Paths.get(doc.getFilePath()), outputStream);
 			}
 			
 			outputStream.flush();
@@ -127,6 +143,4 @@ public class FileDocumentService {
 				stream
 		);
 	}
-	
-	
 }
