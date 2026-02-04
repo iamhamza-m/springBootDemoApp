@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable( HttpMessageNotReadableException exception){
 		
 		ErrorResponse error = new ErrorResponse(
-				"Something is wrong with the payload, plesae ensure the json is correct",
+				"Something is wrong with the payload, please ensure the json is correct",
 				HttpStatus.BAD_REQUEST.value()
 		);
 		
