@@ -68,3 +68,137 @@ By default, the application runs on:
 ```bash
 http://localhost:8080
 ```
+
+
+### Test Data
+
+You can use below test data to setup your application and have some dummy data to run the operations.
+
+```json
+[{
+"carModel": 1,
+"carMakeYear": 2018,
+"carName": "Civic",
+"carCompany": "Honda"
+},
+{
+"carModel": 2,
+"carMakeYear": 2019,
+"carName": "Accord",
+"carCompany": "Honda"
+},
+{
+"carModel": 3,
+"carMakeYear": 2020,
+"carName": "City",
+"carCompany": "Honda"
+},
+{
+"carModel": 4,
+"carMakeYear": 2017,
+"carName": "Corolla",
+"carCompany": "Toyota"
+},
+{
+"carModel": 5,
+"carMakeYear": 2018,
+"carName": "Camry",
+"carCompany": "Toyota"
+},
+{
+"carModel": 6,
+"carMakeYear": 2021,
+"carName": "Fortuner",
+"carCompany": "Toyota"
+},
+{
+"carModel": 7,
+"carMakeYear": 2016,
+"carName": "Swift",
+"carCompany": "Maruti"
+},
+{
+"carModel": 8,
+"carMakeYear": 2019,
+"carName": "Baleno",
+"carCompany": "Maruti"
+},
+{
+"carModel": 9,
+"carMakeYear": 2022,
+"carName": "Brezza",
+"carCompany": "Maruti"
+},
+{
+"carModel": 10,
+"carMakeYear": 2020,
+"carName": "Creta",
+"carCompany": "Hyundai"
+},
+{
+"carModel": 11,
+"carMakeYear": 2021,
+"carName": "Verna",
+"carCompany": "Hyundai"
+},
+{
+"carModel": 12,
+"carMakeYear": 2023,
+"carName": "i20",
+"carCompany": "Hyundai"
+},
+{
+"carModel": 13,
+"carMakeYear": 2015,
+"carName": "X5",
+"carCompany": "BMW"
+},
+{
+"carModel": 14,
+"carMakeYear": 2018,
+"carName": "3 Series",
+"carCompany": "BMW"
+},
+{
+"carModel": 15,
+"carMakeYear": 2022,
+"carName": "7 Series",
+"carCompany": "BMW"
+},
+{
+"carModel": 16,
+"carMakeYear": 2019,
+"carName": "A4",
+"carCompany": "Audi"
+},
+{
+"carModel": 17,
+"carMakeYear": 2020,
+"carName": "A6",
+"carCompany": "Audi"
+},
+{
+"carModel": 18,
+"carMakeYear": 2021,
+"carName": "Q7",
+"carCompany": "Audi"
+},
+{
+"carModel": 19,
+"carMakeYear": 2020,
+"carName": "Model 3",
+"carCompany": "Tesla"
+},
+{
+"carModel": 20,
+"carMakeYear": 2021,
+"carName": "Model Y",
+"carCompany": "Tesla"
+},
+{
+"carModel": 21,
+"carMakeYear": 2023,
+"carName": "Cybertruck",
+"carCompany": "Tesla"
+}]
+```
